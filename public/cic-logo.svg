@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <!-- Maple leaf -->
+  <g transform="translate(150, 140)">
+    <path d="M0,-88 L11,-54 L42,-63 L26,-36 L66,-28 L43,-9 L52,18 L28,9 L23,48 L0,33 L-23,48 L-28,9 L-52,18 L-43,-9 L-66,-28 L-26,-36 L-42,-63 L-11,-54 Z"
+          fill="#C8102E"/>
+    <rect x="-5" y="48" width="10" height="32" fill="#C8102E"/>
+  </g>
+  <!-- CIC text in white for dark backgrounds -->
+  <text x="150" y="268" text-anchor="middle" font-family="Arial Black, Arial" font-weight="900" font-size="72" fill="#ffffff" letter-spacing="2">CIC</text>
+</svg>

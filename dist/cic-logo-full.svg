@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 220" width="500" height="220">
+  <defs>
+    <!-- Ambient Maple Glow -->
+    <radialGradient id="leafGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#C8102E" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#C8102E" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Centered glow behind maple leaf -->
+  <circle cx="250" cy="55" r="75" fill="url(#leafGlow)"/>
+
+  <!-- 1. Canadian Maple Leaf (Exactly centered at X=250) -->
+  <g transform="translate(250, 52) scale(1.0)">
+    <path d="M0,-54 L7,-33 L27,-40 L16,-23 L42,-18 L27,-5 L33,12 L17,6 L15,30 L0,20 L-15,30 L-17,6 L-33,12 L-27,-5 L-42,-18 L-16,-23 L-27,-40 L-7,-33 Z"
+          fill="#C8102E"/>
+    <rect x="-3" y="30" width="6" height="18" fill="#C8102E" rx="1"/>
+  </g>
+
+  <!-- 2. "CIC" text centered at X=250 -->
+  <text x="250" y="118"
+        text-anchor="middle"
+        font-family="'Arial Black', Arial, sans-serif"
+        font-weight="900"
+        font-size="38"
+        fill="#ffffff"
+        letter-spacing="5">CIC</text>
+
+  <!-- 3. "CANADIAN INTERNATIONAL COLLEGE" centered at X=250 -->
+  <text x="250" y="148"
+        text-anchor="middle"
+        font-family="'Inter', Arial, sans-serif"
+        font-weight="700"
+        font-size="14"
+        fill="rgba(255, 255, 255, 0.95)"
+        letter-spacing="3.2">CANADIAN INTERNATIONAL COLLEGE</text>
+
+  <!-- 4. Centered Divider Line (From 90 to 410, midpoint = 250) -->
+  <line x1="90" y1="164" x2="410" y2="164" stroke="#C8102E" stroke-width="2.2" stroke-linecap="round"/>
+
+  <!-- 5. "THE FUTURE IS YOURS" centered at X=250 -->
+  <text x="250" y="188"
+        text-anchor="middle"
+        font-family="'Inter', Arial, sans-serif"
+        font-weight="800"
+        font-size="12"
+        fill="#E8233F"
+        letter-spacing="4.5">THE FUTURE IS YOURS</text>
+</svg>
