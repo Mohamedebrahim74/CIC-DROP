@@ -55,6 +55,8 @@ export default function StartScreen({ onStart }) {
             src="/cic-logo-full.svg"
             alt="Canadian International College"
             className="start-logo"
+            draggable="false"
+            onContextMenu={(e) => e.preventDefault()}
             onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
           />
           <div className="start-logo-fallback" style={{ display: 'none' }}>

@@ -28,6 +28,8 @@ export default function Leaderboard({ currentPlayerName, currentScore, onHome, o
         {/* Header */}
         <div className="leaderboard-header">
           <img src="/cic-logo-full.svg" alt="CIC" className="leaderboard-logo"
+            draggable="false"
+            onContextMenu={(e) => e.preventDefault()}
             onError={e => e.target.style.display = 'none'} />
           <h1 className="leaderboard-title">🏆 CIC LEADERBOARD</h1>
           <p className="leaderboard-subtitle">Top players — compete for the crown!</p>

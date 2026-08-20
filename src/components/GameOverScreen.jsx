@@ -34,6 +34,8 @@ export default function GameOverScreen({
       <div className="overlay-card gameover-card">
         {/* Small logo */}
         <img src="/cic-logo.svg" alt="CIC" className="gameover-logo"
+          draggable="false"
+          onContextMenu={(e) => e.preventDefault()}
           onError={e => e.target.style.display = 'none'} />
 
         <div className="gameover-explosion" aria-hidden="true">💥</div>

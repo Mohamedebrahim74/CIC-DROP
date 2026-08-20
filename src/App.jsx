@@ -84,7 +84,11 @@ export default function App() {
   const isPlaying = screen === GAME_SCREENS.PLAYING || isPaused;
 
   return (
-    <div className="app-root">
+    <div
+      className="app-root"
+      onContextMenu={(e) => e.preventDefault()}
+      onDragStart={(e) => e.preventDefault()}
+    >
       {/* Start Screen */}
       {screen === GAME_SCREENS.START && (
         <StartScreen onStart={startGame} />

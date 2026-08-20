@@ -55,6 +55,57 @@ html, body {
 #root, .app-root {
   height: 100%; width: 100%;
   position: relative; overflow: hidden;
+
+  /* ── Game-asset protection ──────────────────────────────────
+     This whole app IS the game, so these rules are scoped to
+     #root/.app-root rather than the entire document. They stop
+     mobile browsers from treating HUD text, backgrounds, and
+     sprites as selectable/copyable/draggable content, while
+     leaving tap/click/swipe interaction on buttons and controls
+     completely untouched (pointer-events are never disabled). */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  /* iOS Safari: suppresses the long-press "Copy / Look Up /
+     Translate / Save Image" callout shown in the report */
+  -webkit-touch-callout: none;
+
+  /* Removes the grey flash/highlight box on tap (iOS/Android) */
+  -webkit-tap-highlight-color: transparent;
+
+  /* Avoids the 300ms tap delay & double-tap-to-zoom without
+     blocking normal scrolling/swiping gestures used by the game */
+  touch-action: manipulation;
+}
+
+/* Canvas + any <img> game assets: block native drag-out and the
+   Android Chrome long-press "Save/Copy image" context menu. Safe
+   to apply broadly — canvas/img elements are never themselves the
+   tap targets for gameplay (those are the dedicated control
+   buttons), so this never interferes with input handling. */
+.game-canvas,
+.app-root img {
+  -webkit-user-drag: none;
+  user-drag: none;
+  -khtml-user-drag: none;
+  -moz-user-drag: none;
+  -o-user-drag: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+
+/* Form fields (player name / student ID) must keep normal text
+   selection/editing behavior — the game-wide user-select: none
+   above would otherwise make it awkward to select/edit typed text. */
+.app-root input,
+.app-root textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
 }
 
 /* ═══════════════════════════════════════════════════════════════
