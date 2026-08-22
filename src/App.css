@@ -306,6 +306,16 @@ html, body {
   color: #f87171; font-weight: 500;
 }
 
+.attempts-banner {
+  margin-top: 10px; margin-bottom: 2px;
+  padding: 10px 12px;
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.35);
+  border-radius: var(--r-sm, 8px);
+  font-size: 13px; line-height: 1.4;
+  text-align: center;
+}
+
 /* Start Button */
 .start-btn {
   width: 100%; margin-top: 6px;
@@ -333,6 +343,10 @@ html, body {
   box-shadow: 0 16px 44px rgba(200,16,46,0.65), 0 4px 12px rgba(0,0,0,0.5);
 }
 .start-btn:active { transform: translateY(-1px) scale(0.98); }
+.start-btn:disabled {
+  opacity: 0.6; cursor: not-allowed;
+  transform: none !important;
+}
 
 .btn-icon { font-size: 18px; animation: iconPulse 2s ease-in-out infinite; }
 @keyframes iconPulse {

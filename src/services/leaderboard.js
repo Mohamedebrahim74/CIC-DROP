@@ -1,9 +1,64 @@
 import { supabase, isSupabaseAvailable } from './supabase.js';
 import { storage } from './storage.js';
 import { validateScore, maskStudentId, sanitizeName } from '../utils/scoreValidator.js';
+import { MAX_ATTEMPTS_PER_ID } from '../utils/constants.js';
 
 const TABLE = 'game_scores';
 const SUBMISSION_COOLDOWN_MS = 5000; // 5 seconds between submissions
+
+/**
+ * Normalize a student ID for comparison (trim whitespace, case-insensitive)
+ * so "abc123", " ABC123", and "Abc123" are all treated as the same player.
+ */
+function normalizeId(studentId) {
+  return (studentId || '').trim();
+}
+
+/**
+ * Count how many scores have already been submitted for a given Student ID.
+ * Used to enforce the MAX_ATTEMPTS_PER_ID cap before a new game starts, and
+ * again right before a score is inserted as a defense-in-depth check.
+ * Fails OPEN (returns 0) on network/Supabase errors so a transient outage
+ * never locks a legitimate player out.
+ */
+export async function getAttemptsUsed(studentId) {
+  const id = normalizeId(studentId);
+  if (!id) return 0;
+
+  if (!isSupabaseAvailable) {
+    // No backend configured (local/dev preview) -- can't enforce a
+    // cross-device limit, so don't block play.
+    return 0;
+  }
+
+  try {
+    const { count, error } = await supabase
+      .from(TABLE)
+      .select('id', { count: 'exact', head: true })
+      .ilike('student_id', id); // case-insensitive exact match
+
+    if (error) {
+      console.error('[Leaderboard] Attempts check failed:', error);
+      return 0;
+    }
+    return count ?? 0;
+  } catch (err) {
+    console.error('[Leaderboard] Attempts check network error:', err);
+    return 0;
+  }
+}
+
+/**
+ * Returns { allowed, used, remaining } for a given Student ID.
+ */
+export async function checkAttemptsAllowed(studentId) {
+  const used = await getAttemptsUsed(studentId);
+  return {
+    allowed: used < MAX_ATTEMPTS_PER_ID,
+    used,
+    remaining: Math.max(0, MAX_ATTEMPTS_PER_ID - used),
+  };
+}
 
 /**
  * Submit a score to Supabase leaderboard.
@@ -37,6 +92,13 @@ export async function submitScore(playerName, studentId, score, level) {
     return { success: true, local: true };
   }
 
+  // Defense-in-depth: re-check the attempt cap right before inserting, in
+  // case the client-side gate was bypassed or stale (e.g. two tabs open).
+  const used = await getAttemptsUsed(studentId);
+  if (used >= MAX_ATTEMPTS_PER_ID) {
+    return { success: false, error: 'MAX_ATTEMPTS_REACHED' };
+  }
+
   try {
     const { error } = await supabase.from(TABLE).insert([
       {
@@ -61,7 +123,9 @@ export async function submitScore(playerName, studentId, score, level) {
 }
 
 /**
- * Fetch top 10 scores from Supabase.
+ * Fetch top 10 scores from Supabase, one entry per Student ID (their best
+ * score only -- so a player who has used multiple of their 3 attempts
+ * never shows up more than once on the board).
  * Falls back to a local mock if unavailable.
  * Returns { data: Array, error?: string }
  */
@@ -71,19 +135,32 @@ export async function getLeaderboard() {
   }
 
   try {
+    // Fetch a wide pool ordered by score desc, then keep only each
+    // player's first (= highest) row. A generous pool size means the
+    // dedup still surfaces a full top 10 even with many repeat players.
     const { data, error } = await supabase
       .from(TABLE)
       .select('id, player_name, student_id, score, level, created_at')
       .order('score', { ascending: false })
-      .limit(10);
+      .limit(500);
 
     if (error) {
       console.error('[Leaderboard] Supabase fetch error:', error);
       return { data: getLocalLeaderboard(), local: true, error: error.message };
     }
 
+    const seenIds = new Set();
+    const deduped = [];
+    for (const row of data || []) {
+      const key = normalizeId(row.student_id).toLowerCase();
+      if (key && seenIds.has(key)) continue;
+      if (key) seenIds.add(key);
+      deduped.push(row);
+      if (deduped.length >= 10) break;
+    }
+
     // Mask student IDs before returning
-    const masked = (data || []).map((row, idx) => ({
+    const masked = deduped.map((row, idx) => ({
       rank: idx + 1,
       id: row.id,
       player_name: row.player_name,

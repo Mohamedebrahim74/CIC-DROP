@@ -60,6 +60,9 @@ export const GAME_SCREENS = {
   GAME_OVER: 'game_over', LEADERBOARD: 'leaderboard',
 };
 
+// Maximum number of times a single Student ID is allowed to play.
+export const MAX_ATTEMPTS_PER_ID = 3;
+
 export const PARTICLE_CONFIG = {
   SCORE_POPUP_DURATION: 0.9,
   SPARKLE_COUNT: 14,

@@ -9,7 +9,7 @@ function FloatingParticle({ delay, duration, x, size, opacity }) {
   );
 }
 
-export default function StartScreen({ onStart }) {
+export default function StartScreen({ onStart, checking, attemptsError, onClearAttemptsError }) {
   const [name, setName] = useState('');
   const [studentId, setStudentId] = useState('');
   const [nameError, setNameError] = useState('');
@@ -38,8 +38,13 @@ export default function StartScreen({ onStart }) {
     return ok;
   };
 
-  const handleStart = () => { if (validate()) onStart(name.trim(), studentId.trim()); };
+  const handleStart = () => { if (validate() && !checking) onStart(name.trim(), studentId.trim()); };
   const handleKey = (e) => { if (e.key === 'Enter') handleStart(); };
+  const handleIdChange = (e) => {
+    setStudentId(e.target.value);
+    setIdError('');
+    onClearAttemptsError?.();
+  };
 
   return (
     <div className="start-screen">
@@ -114,16 +119,27 @@ export default function StartScreen({ onStart }) {
                 value={studentId}
                 maxLength={20}
                 autoComplete="off"
-                onChange={e => { setStudentId(e.target.value); setIdError(''); }}
+                onChange={handleIdChange}
                 onKeyDown={handleKey}
               />
             </div>
             {idError && <span className="error-msg" role="alert">{idError}</span>}
           </div>
 
-          <button id="start-game-btn" className="start-btn" onClick={handleStart}>
+          {attemptsError && (
+            <p className="error-msg attempts-banner" role="alert">
+              🚫 {attemptsError}
+            </p>
+          )}
+
+          <button
+            id="start-game-btn"
+            className="start-btn"
+            onClick={handleStart}
+            disabled={checking}
+          >
             <span className="btn-icon" aria-hidden="true">🎓</span>
-            START GAME
+            {checking ? 'CHECKING…' : 'START GAME'}
           </button>
         </div>
 

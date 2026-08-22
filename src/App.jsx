@@ -1,8 +1,8 @@
-import { useCallback, useRef, useEffect } from 'react';
+import { useCallback, useRef, useEffect, useState } from 'react';
 import { useGameState } from './hooks/useGameState.js';
 import { useSound } from './hooks/useSound.js';
-import { GAME_SCREENS } from './utils/constants.js';
-import { submitScore } from './services/leaderboard.js';
+import { GAME_SCREENS, MAX_ATTEMPTS_PER_ID } from './utils/constants.js';
+import { submitScore, checkAttemptsAllowed } from './services/leaderboard.js';
 
 import StartScreen from './components/StartScreen.jsx';
 import GameCanvas from './components/GameCanvas.jsx';
@@ -20,6 +20,33 @@ export default function App() {
   } = useGameState();
 
   const { muted, toggleMute, sounds } = useSound();
+
+  // ── Attempt-limit gating ─────────────────────────────────────
+  // Every path that can start a game (Start Screen submit, Restart from
+  // pause, Play Again from game-over/leaderboard) funnels through this
+  // one function so the MAX_ATTEMPTS_PER_ID cap is always enforced,
+  // regardless of which button was pressed.
+  const [attemptsError, setAttemptsError] = useState('');
+  const [checkingAttempts, setCheckingAttempts] = useState(false);
+
+  const beginGame = useCallback(async (name, id) => {
+    setCheckingAttempts(true);
+    setAttemptsError('');
+    const { allowed, used } = await checkAttemptsAllowed(id);
+    setCheckingAttempts(false);
+
+    if (!allowed) {
+      setAttemptsError(
+        `This Student ID has already played ${used} of ${MAX_ATTEMPTS_PER_ID} allowed games. No more attempts are available.`
+      );
+      goToStart();
+      return;
+    }
+
+    startGame(name, id);
+  }, [startGame, goToStart]);
+
+  const clearAttemptsError = useCallback(() => setAttemptsError(''), []);
 
   // Track previous level for sound
   const prevLevelRef = useRef(1);
@@ -71,14 +98,14 @@ export default function App() {
   const handleRestart = useCallback(() => {
     prevLevelRef.current = 1;
     prevScoreRef.current = 0;
-    startGame(playerName, studentId);
-  }, [startGame, playerName, studentId]);
+    beginGame(playerName, studentId);
+  }, [beginGame, playerName, studentId]);
 
   const handlePlayAgain = useCallback(() => {
     prevLevelRef.current = 1;
     prevScoreRef.current = 0;
-    startGame(playerName, studentId);
-  }, [startGame, playerName, studentId]);
+    beginGame(playerName, studentId);
+  }, [beginGame, playerName, studentId]);
 
   const isPaused = screen === GAME_SCREENS.PAUSED;
   const isPlaying = screen === GAME_SCREENS.PLAYING || isPaused;
@@ -91,7 +118,12 @@ export default function App() {
     >
       {/* Start Screen */}
       {screen === GAME_SCREENS.START && (
-        <StartScreen onStart={startGame} />
+        <StartScreen
+          onStart={beginGame}
+          checking={checkingAttempts}
+          attemptsError={attemptsError}
+          onClearAttemptsError={clearAttemptsError}
+        />
       )}
 
       {/* Game Canvas (keep mounted while playing or paused) */}
