@@ -14,7 +14,7 @@ import './App.css';
 
 export default function App() {
   const {
-    screen, score, level, playerName, studentId, highScore, isNewHighScore,
+    screen, score, level, playerName, studentId, highScore, isNewHighScore, branch,
     startGame, handleGameOver, goToStart, goToLeaderboard,
     pause, resume, updateScore, updateLevel,
   } = useGameState();
@@ -71,7 +71,7 @@ export default function App() {
     handleGameOver(finalScore, finalLevel);
 
     // Submit score to leaderboard
-    submitScore(playerName, studentId, finalScore, finalLevel).then(({ success, error }) => {
+    submitScore(playerName, studentId, finalScore, finalLevel, branch).then(({ success, error }) => {
       if (!success) console.warn('[Score submit]', error);
     });
 
@@ -80,7 +80,7 @@ export default function App() {
     if (finalScore >= localHighScore && finalScore > 0) {
       setTimeout(() => sounds.highScore(), 400);
     }
-  }, [sounds, handleGameOver, playerName, studentId]);
+  }, [sounds, handleGameOver, playerName, studentId, branch]);
 
   // Collect cap sound — wired from score changes
   const prevScoreRef = useRef(0);
@@ -134,6 +134,7 @@ export default function App() {
           level={level}
           highScore={highScore}
           muted={muted}
+          branch={branch}
           onToggleMute={toggleMute}
           onScoreChange={onScoreChange}
           onLevelChange={onLevelChange}
@@ -171,6 +172,7 @@ export default function App() {
         <Leaderboard
           currentPlayerName={playerName}
           currentScore={score}
+          branch={branch}
           onHome={goToStart}
           onPlayAgain={handlePlayAgain}
         />

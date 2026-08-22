@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getLeaderboard } from '../services/leaderboard.js';
+import { getBranchLabel } from '../utils/branch.js';
 
-export default function Leaderboard({ currentPlayerName, currentScore, onHome, onPlayAgain }) {
+export default function Leaderboard({ currentPlayerName, currentScore, branch, onHome, onPlayAgain }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isLocal, setIsLocal] = useState(false);
@@ -9,17 +10,18 @@ export default function Leaderboard({ currentPlayerName, currentScore, onHome, o
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    getLeaderboard().then(({ data, local }) => {
+    getLeaderboard(branch || 'all').then(({ data, local }) => {
       if (!alive) return;
       setEntries(data || []);
       setIsLocal(!!local);
       setLoading(false);
     });
     return () => { alive = false; };
-  }, []);
+  }, [branch]);
 
   const medal = r => r === 1 ? '🥇' : r === 2 ? '🥈' : r === 3 ? '🥉' : r;
   const isMe  = e => e.player_name === currentPlayerName && e.score === currentScore;
+  const branchLabel = branch ? getBranchLabel(branch) : '';
 
   return (
     <div className="leaderboard-screen">
@@ -31,7 +33,9 @@ export default function Leaderboard({ currentPlayerName, currentScore, onHome, o
             draggable="false"
             onContextMenu={(e) => e.preventDefault()}
             onError={e => e.target.style.display = 'none'} />
-          <h1 className="leaderboard-title">🏆 CIC LEADERBOARD</h1>
+          <h1 className="leaderboard-title">
+            🏆 {branchLabel ? `${branchLabel} LEADERBOARD` : 'CIC LEADERBOARD'}
+          </h1>
           <p className="leaderboard-subtitle">Top players — compete for the crown!</p>
           {isLocal && (
             <div className="leaderboard-notice">⚠️ Showing local data — connect to see global rankings</div>

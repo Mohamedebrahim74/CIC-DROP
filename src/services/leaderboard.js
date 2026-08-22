@@ -2,9 +2,21 @@ import { supabase, isSupabaseAvailable } from './supabase.js';
 import { storage } from './storage.js';
 import { validateScore, maskStudentId, sanitizeName } from '../utils/scoreValidator.js';
 import { MAX_ATTEMPTS_PER_ID } from '../utils/constants.js';
+import { BRANCHES } from '../utils/branch.js';
 
 const TABLE = 'game_scores';
 const SUBMISSION_COOLDOWN_MS = 5000; // 5 seconds between submissions
+const VALID_BRANCHES = Object.values(BRANCHES); // ['newcairo', 'zayed']
+
+/**
+ * Only ever allow one of the known branch values through to Supabase.
+ * The branch is derived from the URL (see utils/branch.js) and is never
+ * taken from arbitrary user input, but this is a last line of defense
+ * against a tampered/forged value reaching the database.
+ */
+function sanitizeBranch(branch) {
+  return VALID_BRANCHES.includes(branch) ? branch : null;
+}
 
 /**
  * Normalize a student ID for comparison (trim whitespace, case-insensitive)
@@ -65,7 +77,7 @@ export async function checkAttemptsAllowed(studentId) {
  * Falls back to localStorage-only if Supabase unavailable.
  * Returns { success: boolean, error?: string }
  */
-export async function submitScore(playerName, studentId, score, level) {
+export async function submitScore(playerName, studentId, score, level, branch) {
   // Validate
   const { valid, reason } = validateScore(score, level);
   if (!valid) {
@@ -106,6 +118,7 @@ export async function submitScore(playerName, studentId, score, level) {
         student_id: studentId,
         score: Math.floor(score),
         level: Math.floor(level),
+        branch: sanitizeBranch(branch),
       },
     ]);
 
@@ -126,10 +139,13 @@ export async function submitScore(playerName, studentId, score, level) {
  * Fetch top 10 scores from Supabase, one entry per Student ID (their best
  * score only -- so a player who has used multiple of their 3 attempts
  * never shows up more than once on the board).
+ *
+ * @param {'newcairo'|'zayed'|'all'} branch - which board to show.
+ *   'all' (default) returns the combined leaderboard across all branches.
  * Falls back to a local mock if unavailable.
  * Returns { data: Array, error?: string }
  */
-export async function getLeaderboard() {
+export async function getLeaderboard(branch = 'all') {
   if (!isSupabaseAvailable) {
     return { data: getLocalLeaderboard(), local: true };
   }
@@ -138,11 +154,17 @@ export async function getLeaderboard() {
     // Fetch a wide pool ordered by score desc, then keep only each
     // player's first (= highest) row. A generous pool size means the
     // dedup still surfaces a full top 10 even with many repeat players.
-    const { data, error } = await supabase
+    let query = supabase
       .from(TABLE)
-      .select('id, player_name, student_id, score, level, created_at')
+      .select('id, player_name, student_id, score, level, branch, created_at')
       .order('score', { ascending: false })
       .limit(500);
+
+    if (branch && branch !== 'all' && VALID_BRANCHES.includes(branch)) {
+      query = query.eq('branch', branch);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('[Leaderboard] Supabase fetch error:', error);

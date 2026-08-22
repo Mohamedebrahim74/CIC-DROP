@@ -6,7 +6,7 @@ import MobileControls from './MobileControls.jsx';
 
 export default function GameCanvas({
   playerName, score, level, highScore,
-  muted, onToggleMute,
+  muted, onToggleMute, branch,
   onScoreChange, onLevelChange, onGameOver, onPause,
   isPaused,
 }) {
@@ -95,7 +95,7 @@ export default function GameCanvas({
       <div className="game-column">
         <GameHUD
           score={score} level={level} highScore={highScore}
-          playerName={playerName}
+          playerName={playerName} branch={branch}
           onPause={onPause} muted={muted} onToggleMute={onToggleMute}
         />
 

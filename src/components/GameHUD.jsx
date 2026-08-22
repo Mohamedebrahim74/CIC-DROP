@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
+import { getBranchLabel } from '../utils/branch.js';
 
-export default function GameHUD({ score, level, highScore, playerName, onPause, muted, onToggleMute }) {
+export default function GameHUD({ score, level, highScore, playerName, branch, onPause, muted, onToggleMute }) {
   const [levelNotify, setLevelNotify] = useState(false);
   const [prevLevel, setPrevLevel] = useState(level);
   const timer = useRef(null);
@@ -34,6 +35,7 @@ export default function GameHUD({ score, level, highScore, playerName, onPause, 
         <div className="hud-player-name">
           PLAYER: <span className="player-name-val">{playerName}</span>
         </div>
+        {branch && <div className="hud-branch-label">{getBranchLabel(branch)}</div>}
       </div>
 
       {/* RIGHT — High Score + Buttons */}

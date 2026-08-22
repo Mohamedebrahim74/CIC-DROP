@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { GAME_SCREENS } from '../utils/constants.js';
 import { storage } from '../services/storage.js';
+import { getCurrentBranch } from '../utils/branch.js';
 
 export function useGameState() {
   const [screen, setScreen] = useState(GAME_SCREENS.START);
@@ -10,6 +11,9 @@ export function useGameState() {
   const [studentId, setStudentId] = useState(storage.getStudentId());
   const [highScore, setHighScore] = useState(storage.getHighScore());
   const [isNewHighScore, setIsNewHighScore] = useState(false);
+  // Derived once from the URL at load time (e.g. /cic/newcairo → 'newcairo').
+  // Never changes during the session and is never taken from user input.
+  const [branch] = useState(() => getCurrentBranch());
 
   const updateScore = useCallback((newScore) => {
     setScore(newScore);
@@ -65,7 +69,7 @@ export function useGameState() {
   }, []);
 
   return {
-    screen, score, level, playerName, studentId, highScore,
+    screen, score, level, playerName, studentId, highScore, branch,
     isNewHighScore, setHighScore,
     startGame, handleGameOver, goToStart, goToLeaderboard,
     pause, resume, updateScore, updateLevel,

@@ -458,6 +458,12 @@ html, body {
 }
 .player-name-val { color: var(--red); font-weight: 700; }
 
+.hud-branch-label {
+  font-size: 9px; font-weight: 600; letter-spacing: 2px;
+  color: var(--gold, #f5c842); opacity: 0.75;
+  margin-top: 2px; text-align: center;
+}
+
 .hud-buttons {
   display: flex; gap: 6px; margin-top: 3px; justify-content: flex-end;
 }
