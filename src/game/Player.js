@@ -174,11 +174,14 @@ export class Player {
     ctx.restore();
 
     // CIC Branding on Chest
+    ctx.save();
+    if (this.facingLeft) ctx.scale(-1, 1); // counter the outer flip so text stays readable
     ctx.fillStyle    = '#ffffff';
     ctx.font         = `900 ${Math.round(w * 0.24)}px "Arial Black", Arial, sans-serif`;
     ctx.textAlign    = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('CIC', 0, bodyY + bodyH * 0.52);
+    ctx.restore();
 
     // ── 4. Arms & Hands ──
     const armSwing = isWalking
@@ -195,7 +198,7 @@ export class Player {
     ctx.fillStyle = '#C8102E';
     rRect(ctx, -armW / 2, 0, armW, armH, 5);
     ctx.fill();
-    ctx.fillStyle = '#F5C094';
+    ctx.fillStyle = '#FFCF3F';
     ctx.beginPath();
     ctx.arc(0, armH + 3, armW * 0.45, 0, Math.PI * 2);
     ctx.fill();
@@ -208,7 +211,7 @@ export class Player {
     ctx.fillStyle = '#C8102E';
     rRect(ctx, -armW / 2, 0, armW, armH, 5);
     ctx.fill();
-    ctx.fillStyle = '#F5C094';
+    ctx.fillStyle = '#FFCF3F';
     ctx.beginPath();
     ctx.arc(0, armH + 3, armW * 0.45, 0, Math.PI * 2);
     ctx.fill();
@@ -220,93 +223,104 @@ export class Player {
     ctx.ellipse(0, h * 0.34, w * 0.26, h * 0.07, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // ── 6. Head & Face ──
+    // ── 6. Head & Face (original sponge mascot) ──
     const headR  = w * 0.36;
     const headCY = h * 0.22;
+    const hs = headR * 0.95; // half-size of the rounded-square head
 
-    // Hair Back Layer
-    ctx.fillStyle = '#1e140c';
-    ctx.beginPath();
-    ctx.ellipse(0, headCY - headR * 0.12, headR * 1.05, headR * 0.85, 0, Math.PI, Math.PI * 2);
-    ctx.fill();
+    // Bumpy porous top edge
+    ctx.fillStyle = '#FFCF3F';
+    ctx.strokeStyle = '#E0A93B';
+    ctx.lineWidth = 1.5;
+    [-hs * 0.5, 0, hs * 0.5].forEach((bx) => {
+      ctx.beginPath();
+      ctx.arc(bx, headCY - hs, headR * 0.16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
 
-    // Face Skin
+    // Head: rounded-square sponge body
     ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    ctx.shadowBlur  = 6;
-    const face = ctx.createRadialGradient(-headR * 0.1, headCY - headR * 0.2, 2, 0, headCY, headR);
-    face.addColorStop(0,   '#F8CDA8');
-    face.addColorStop(0.7, '#F0B88C');
-    face.addColorStop(1,   '#DFA070');
-    ctx.fillStyle = face;
-    ctx.beginPath();
-    ctx.ellipse(0, headCY, headR * 0.9, headR, 0, 0, Math.PI * 2);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+    ctx.shadowBlur  = 5;
+    ctx.fillStyle = '#FFCF3F';
+    rRect(ctx, -hs, headCY - hs, hs * 2, hs * 2, hs * 0.35);
     ctx.fill();
     ctx.restore();
+    ctx.strokeStyle = '#E0A93B';
+    ctx.lineWidth = 1.5;
+    rRect(ctx, -hs, headCY - hs, hs * 2, hs * 2, hs * 0.35);
+    ctx.stroke();
 
-    // Hair Strands (Front)
-    ctx.fillStyle = '#2a1a10';
-    ctx.beginPath();
-    ctx.ellipse(-headR * 0.42, headCY - headR * 0.65, headR * 0.32, headR * 0.26, -0.3, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(0, headCY - headR * 0.82, headR * 0.28, headR * 0.24, 0.05, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(headR * 0.42, headCY - headR * 0.65, headR * 0.32, headR * 0.26, 0.3, 0, Math.PI * 2);
-    ctx.fill();
+    // Sponge texture holes
+    ctx.fillStyle = 'rgba(224, 169, 59, 0.55)';
+    [[-hs * 0.62, headCY - hs * 0.55], [hs * 0.68, headCY - hs * 0.62],
+     [-hs * 0.72, headCY + hs * 0.15], [hs * 0.7, headCY + hs * 0.25]]
+      .forEach(([hx, hy]) => {
+        ctx.beginPath();
+        ctx.ellipse(hx, hy, 2.2, 3, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
 
     // Eyes
-    const eyeY = headCY + headR * 0.04;
-    const eyeSpacing = headR * 0.38;
+    const eyeY = headCY - headR * 0.02;
+    const eyeSpacing = headR * 0.42;
 
-    // Sclera
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.ellipse(-eyeSpacing, eyeY, 6, 7, 0, 0, Math.PI * 2);
-    ctx.ellipse( eyeSpacing, eyeY, 6, 7, 0, 0, Math.PI * 2);
+    ctx.arc(-eyeSpacing, eyeY, headR * 0.32, 0, Math.PI * 2);
+    ctx.arc( eyeSpacing, eyeY, headR * 0.32, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#E0A93B';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(-eyeSpacing, eyeY, headR * 0.32, 0, Math.PI * 2);
+    ctx.arc( eyeSpacing, eyeY, headR * 0.32, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Iris
+    ctx.fillStyle = '#2F80C4';
+    ctx.beginPath();
+    ctx.arc(-eyeSpacing + 1.5, eyeY + 1.5, headR * 0.16, 0, Math.PI * 2);
+    ctx.arc( eyeSpacing + 1.5, eyeY + 1.5, headR * 0.16, 0, Math.PI * 2);
     ctx.fill();
 
     // Pupils
-    ctx.fillStyle = '#1c1b2c';
+    ctx.fillStyle = '#1a1a1a';
     ctx.beginPath();
-    ctx.ellipse(-eyeSpacing, eyeY + 0.5, 3.5, 4.5, 0, 0, Math.PI * 2);
-    ctx.ellipse( eyeSpacing, eyeY + 0.5, 3.5, 4.5, 0, 0, Math.PI * 2);
+    ctx.arc(-eyeSpacing + 1.5, eyeY + 1.5, headR * 0.075, 0, Math.PI * 2);
+    ctx.arc( eyeSpacing + 1.5, eyeY + 1.5, headR * 0.075, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eye Highlights
+    // Eye highlights
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(-eyeSpacing - 1.5, eyeY - 2, 1.8, 0, Math.PI * 2);
-    ctx.arc( eyeSpacing - 1.5, eyeY - 2, 1.8, 0, Math.PI * 2);
+    ctx.arc(-eyeSpacing - 2, eyeY - 2, 1.6, 0, Math.PI * 2);
+    ctx.arc( eyeSpacing - 2, eyeY - 2, 1.6, 0, Math.PI * 2);
     ctx.fill();
 
-    // Eyebrows
-    ctx.strokeStyle = '#2a1a10';
-    ctx.lineWidth   = 2.2;
-    ctx.lineCap     = 'round';
+    // Nose
+    ctx.fillStyle = '#F2994A';
+    ctx.strokeStyle = '#D97F2F';
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(-eyeSpacing - headR * 0.22, eyeY - headR * 0.32);
-    ctx.quadraticCurveTo(-eyeSpacing, eyeY - headR * 0.44, -eyeSpacing + headR * 0.22, eyeY - headR * 0.30);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(eyeSpacing - headR * 0.22, eyeY - headR * 0.30);
-    ctx.quadraticCurveTo(eyeSpacing, eyeY - headR * 0.44, eyeSpacing + headR * 0.22, eyeY - headR * 0.32);
+    ctx.ellipse(0, eyeY + headR * 0.34, headR * 0.09, headR * 0.07, 0, 0, Math.PI * 2);
+    ctx.fill();
     ctx.stroke();
 
     // Smile
-    ctx.strokeStyle = '#8B3A1A';
-    ctx.lineWidth   = 2.0;
+    ctx.strokeStyle = '#3A2E1F';
+    ctx.lineWidth   = 2.2;
+    ctx.lineCap     = 'round';
     ctx.beginPath();
-    ctx.arc(0, eyeY + headR * 0.32, headR * 0.24, 0.15, Math.PI - 0.15);
+    ctx.arc(0, eyeY + headR * 0.28, headR * 0.26, 0.2, Math.PI - 0.2);
     ctx.stroke();
 
-    // Cute Cheeks Blush
-    ctx.fillStyle = 'rgba(255, 120, 100, 0.28)';
+    // Blush cheeks
+    ctx.fillStyle = 'rgba(245, 163, 163, 0.6)';
     ctx.beginPath();
-    ctx.ellipse(-headR * 0.58, eyeY + headR * 0.22, headR * 0.22, headR * 0.14, 0, 0, Math.PI * 2);
-    ctx.ellipse( headR * 0.58, eyeY + headR * 0.22, headR * 0.22, headR * 0.14, 0, 0, Math.PI * 2);
+    ctx.ellipse(-headR * 0.66, eyeY + headR * 0.28, headR * 0.16, headR * 0.09, 0, 0, Math.PI * 2);
+    ctx.ellipse( headR * 0.66, eyeY + headR * 0.28, headR * 0.16, headR * 0.09, 0, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.restore();
