@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getAllLeaderboardEntries } from '../services/leaderboard.js';
 import { BRANCHES, BRANCH_LABELS } from '../utils/branch.js';
 
 const SESSION_KEY = 'cic_admin_authed';
+const PAGE_SIZE = 10;
 
 const TABS = [
   { key: 'all', label: 'ALL BRANCHES' },
@@ -71,6 +72,7 @@ function AdminDashboard({ onLogout }) {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [page, setPage] = useState(1);
 
   const load = useCallback((b) => {
     setLoading(true);
@@ -84,10 +86,23 @@ function AdminDashboard({ onLogout }) {
 
   useEffect(() => { load(branch); }, [branch, load]);
 
+  // Reset to page 1 whenever the branch changes or the data set changes
+  useEffect(() => { setPage(1); }, [branch, entries.length]);
+
+  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+
+  const pageEntries = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return entries.slice(start, start + PAGE_SIZE);
+  }, [entries, page]);
+
   const handleLogout = () => {
     sessionStorage.removeItem(SESSION_KEY);
     onLogout();
   };
+
+  const goPrev = () => setPage((p) => Math.max(1, p - 1));
+  const goNext = () => setPage((p) => Math.min(totalPages, p + 1));
 
   return (
     <div className="leaderboard-screen">
@@ -126,34 +141,48 @@ function AdminDashboard({ onLogout }) {
               <p>No scores submitted yet.</p>
             </div>
           ) : (
-            <table className="leaderboard-table" aria-label="All leaderboard results">
-              <thead>
-                <tr>
-                  <th scope="col">#</th>
-                  <th scope="col">PLAYER</th>
-                  <th scope="col">STUDENT ID</th>
-                  <th scope="col">SCORE</th>
-                  <th scope="col">LVL</th>
-                  <th scope="col">BRANCH</th>
-                  <th scope="col">DATE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {entries.map((entry, idx) => (
-                  <tr key={entry.id} className="leaderboard-row">
-                    <td className="rank-cell">{idx + 1}</td>
-                    <td className="player-cell">{entry.player_name}</td>
-                    <td className="id-cell">{entry.student_id}</td>
-                    <td className="score-cell">{entry.score.toLocaleString()}</td>
-                    <td className="level-cell">{entry.level}</td>
-                    <td className="level-cell">{entry.branch || '—'}</td>
-                    <td className="level-cell">
-                      {entry.created_at ? new Date(entry.created_at).toLocaleString() : '—'}
-                    </td>
+            <>
+              <table className="leaderboard-table" aria-label="Leaderboard results">
+                <thead>
+                  <tr>
+                    <th scope="col">PLAYER</th>
+                    <th scope="col">SCORE</th>
+                    <th scope="col">STUDENT ID</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {pageEntries.map((entry) => (
+                    <tr key={entry.id} className="leaderboard-row">
+                      <td className="player-cell">{entry.player_name}</td>
+                      <td className="score-cell">{entry.score.toLocaleString()}</td>
+                      <td className="id-cell">{entry.student_id}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+
+              {totalPages > 1 && (
+                <div className="leaderboard-actions" style={{ marginTop: '1rem', justifyContent: 'center', gap: '1rem' }}>
+                  <button
+                    className="overlay-btn btn-ghost"
+                    onClick={goPrev}
+                    disabled={page === 1}
+                  >
+                    ← PREV
+                  </button>
+                  <span style={{ alignSelf: 'center' }}>
+                    Page {page} of {totalPages}
+                  </span>
+                  <button
+                    className="overlay-btn btn-ghost"
+                    onClick={goNext}
+                    disabled={page === totalPages}
+                  >
+                    NEXT →
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
 
