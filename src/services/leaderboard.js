@@ -199,6 +199,34 @@ export async function getLeaderboard(branch = 'all') {
 }
 
 /**
+ * ADMIN ONLY: Fetch every leaderboard row (unmasked, not deduped/limited to
+ * top 10). Used by the admin page to review all results.
+ * Returns { data: Array, error?: string }
+ */
+export async function getAllLeaderboardEntries() {
+  if (!isSupabaseAvailable) {
+    return { data: [], error: 'Supabase not configured' };
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select('id, player_name, student_id, score, level, branch, created_at')
+      .order('score', { ascending: false });
+
+    if (error) {
+      console.error('[Leaderboard] Admin fetch error:', error);
+      return { data: [], error: error.message };
+    }
+
+    return { data: data || [] };
+  } catch (err) {
+    console.error('[Leaderboard] Admin fetch network error:', err);
+    return { data: [], error: err.message };
+  }
+}
+
+/**
  * Get player rank for a given score from Supabase.
  */
 export async function getPlayerRank(score) {
