@@ -1,7 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllLeaderboardEntries } from '../services/leaderboard.js';
+import { BRANCHES, BRANCH_LABELS } from '../utils/branch.js';
 
 const SESSION_KEY = 'cic_admin_authed';
+
+const TABS = [
+  { key: 'all', label: 'ALL BRANCHES' },
+  { key: BRANCHES.NEW_CAIRO, label: BRANCH_LABELS[BRANCHES.NEW_CAIRO] },
+  { key: BRANCHES.ZAYED, label: BRANCH_LABELS[BRANCHES.ZAYED] },
+];
 
 // Admin password comes from an env var set at build/deploy time
 // (VITE_ADMIN_PASSWORD). Never hardcode it in source.
@@ -60,21 +67,22 @@ function AdminLogin({ onAuthed }) {
 }
 
 function AdminDashboard({ onLogout }) {
+  const [branch, setBranch] = useState('all');
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const load = useCallback(() => {
+  const load = useCallback((b) => {
     setLoading(true);
     setError('');
-    getAllLeaderboardEntries().then(({ data, error }) => {
+    getAllLeaderboardEntries(b).then(({ data, error }) => {
       setEntries(data || []);
       if (error) setError(error);
       setLoading(false);
     });
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { load(branch); }, [branch, load]);
 
   const handleLogout = () => {
     sessionStorage.removeItem(SESSION_KEY);
@@ -85,11 +93,25 @@ function AdminDashboard({ onLogout }) {
     <div className="leaderboard-screen">
       <div className="leaderboard-container">
         <div className="leaderboard-header">
-          <h1 className="leaderboard-title">🔒 ADMIN — ALL RESULTS</h1>
+          <h1 className="leaderboard-title">🔒 ADMIN DASHBOARD</h1>
           <p className="leaderboard-subtitle">
-            {loading ? 'Loading…' : `${entries.length} total submission${entries.length === 1 ? '' : 's'}`}
+            {loading ? 'Loading…' : `${entries.length} submission${entries.length === 1 ? '' : 's'}`}
           </p>
           {error && <div className="leaderboard-notice">⚠️ {error}</div>}
+        </div>
+
+        {/* Branch tabs */}
+        <div className="leaderboard-actions" style={{ marginBottom: '1rem' }}>
+          {TABS.map(tab => (
+            <button
+              key={tab.key}
+              className={`overlay-btn ${branch === tab.key ? 'btn-primary' : 'btn-ghost'}`}
+              onClick={() => setBranch(tab.key)}
+              disabled={loading && branch === tab.key}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         <div className="leaderboard-table-wrap">
@@ -136,7 +158,7 @@ function AdminDashboard({ onLogout }) {
         </div>
 
         <div className="leaderboard-actions">
-          <button id="admin-refresh-btn" className="overlay-btn btn-primary" onClick={load}>↻ REFRESH</button>
+          <button id="admin-refresh-btn" className="overlay-btn btn-primary" onClick={() => load(branch)}>↻ REFRESH</button>
           <button id="admin-logout-btn" className="overlay-btn btn-ghost" onClick={handleLogout}>🚪 LOGOUT</button>
         </div>
       </div>

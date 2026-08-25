@@ -201,18 +201,26 @@ export async function getLeaderboard(branch = 'all') {
 /**
  * ADMIN ONLY: Fetch every leaderboard row (unmasked, not deduped/limited to
  * top 10). Used by the admin page to review all results.
+ * @param {'newcairo'|'zayed'|'all'} [branch] - filter to one branch, or
+ *   omit/'all' for every branch combined.
  * Returns { data: Array, error?: string }
  */
-export async function getAllLeaderboardEntries() {
+export async function getAllLeaderboardEntries(branch = 'all') {
   if (!isSupabaseAvailable) {
     return { data: [], error: 'Supabase not configured' };
   }
 
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from(TABLE)
       .select('id, player_name, student_id, score, level, branch, created_at')
       .order('score', { ascending: false });
+
+    if (branch && branch !== 'all' && VALID_BRANCHES.includes(branch)) {
+      query = query.eq('branch', branch);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('[Leaderboard] Admin fetch error:', error);
