@@ -130,9 +130,9 @@ html, body {
   justify-content: center;
   overflow: hidden;
   background:
-    radial-gradient(ellipse 90% 70% at 50% -10%, rgba(200,16,46,0.25) 0%, transparent 70%),
-    radial-gradient(ellipse 60% 50% at 10% 100%, rgba(200,16,46,0.12) 0%, transparent 60%),
-    linear-gradient(180deg, rgba(6, 8, 16, 0.72) 0%, rgba(3, 5, 12, 0.88) 100%),
+    radial-gradient(ellipse 90% 70% at 50% -10%, rgba(200,16,46,0.18) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 10% 100%, rgba(200,16,46,0.08) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(6, 8, 16, 0.48) 0%, rgba(3, 5, 12, 0.66) 100%),
     url('/cic-bg.jpg') center center / cover no-repeat;
   animation: fadeIn 0.5s var(--ease);
 }
@@ -176,13 +176,14 @@ html, body {
 
 .start-content {
   position: relative; z-index: 1;
-  width: min(420px, 94vw);
+  width: min(760px, 92vw);
   display: flex; flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 16px 0 100px; /* bottom padding so campus silo doesn't overlap */
+  gap: 18px;
+  padding: 20px 0 70px;
   max-height: 100vh;
   overflow-y: auto; scrollbar-width: none;
+  transform: translateY(-3vh);
 }
 .start-content::-webkit-scrollbar { display: none; }
 
@@ -191,9 +192,9 @@ html, body {
   width: 100%;
 }
 .start-logo {
-  height: clamp(65px, 11vh, 95px);
+  height: clamp(72px, 13vh, 110px);
   width: auto;
-  max-width: 90%;
+  max-width: 72%;
   object-fit: contain;
   filter: drop-shadow(0 0 16px rgba(200,16,46,0.45));
 }
@@ -213,23 +214,28 @@ html, body {
 /* Title */
 .start-title {
   font-family: var(--font-game);
-  font-size: clamp(15px, 3.5vw, 20px);
+  font-size: clamp(14px, 2.2vw, 20px);
   font-weight: 700;
-  letter-spacing: 5px;
-  color: var(--white-85);
+  letter-spacing: clamp(3px, 0.5vw, 5px);
+  color: var(--white);
   text-align: center;
-  line-height: 1;
-  text-shadow: 0 0 40px rgba(200,16,46,0.2);
+  line-height: 1.05;
+  text-shadow: 0 0 24px rgba(0,0,0,0.65);
+  width: 100%;
+  max-width: 760px;
 }
 .title-accent {
   display: block;
-  font-size: clamp(38px, 10vw, 58px);
+  margin-top: 8px;
+  font-size: clamp(34px, 7.2vw, 68px);
   font-weight: 900;
   color: var(--red);
-  letter-spacing: 4px;
+  letter-spacing: clamp(1px, 0.35vw, 4px);
+  white-space: nowrap;
+  line-height: 0.95;
   text-shadow:
-    0 0 30px rgba(200,16,46,0.8),
-    0 0 80px rgba(200,16,46,0.3);
+    0 0 24px rgba(200,16,46,0.75),
+    0 0 60px rgba(200,16,46,0.28);
   animation: titleGlow 3s ease-in-out infinite alternate;
 }
 @keyframes titleGlow {
@@ -876,6 +882,31 @@ html, body {
   .mobile-controls { display: none; }
 }
 
+/* Narrow phones: keep the closing title fully visible */
+@media (max-width: 520px) {
+  .start-content {
+    width: min(96vw, 620px);
+    gap: 14px;
+    padding-bottom: 50px;
+    transform: translateY(-2vh);
+  }
+
+  .start-logo {
+    height: clamp(62px, 12vh, 86px);
+    max-width: 82%;
+  }
+
+  .start-title {
+    font-size: 13px;
+    letter-spacing: 3px;
+  }
+
+  .title-accent {
+    font-size: clamp(28px, 7.2vw, 46px);
+    letter-spacing: 0;
+  }
+}
+
 /* Small phones */
 @media (max-width: 390px) {
   .gameover-stats { padding: 12px; }
@@ -886,9 +917,10 @@ html, body {
 
 /* Short screens */
 @media (max-height: 680px) {
-  .start-content { gap: 10px; padding-bottom: 60px; }
-  .start-title { font-size: 14px; }
-  .title-accent { font-size: 34px; }
+  .start-content { gap: 12px; padding-bottom: 40px; transform: translateY(-1vh); }
+  .start-logo { height: clamp(58px, 11vh, 82px); }
+  .start-title { font-size: 13px; }
+  .title-accent { font-size: clamp(30px, 6vw, 48px); }
   .game-hud { min-height: 54px; padding: 7px 12px; }
   .mobile-controls { padding: 6px 20px 8px; }
   .mobile-btn { width: 60px; height: 60px; font-size: 20px; }
@@ -897,9 +929,16 @@ html, body {
 /* Landscape mobile */
 @media (max-height: 450px) and (orientation: landscape) {
   .start-screen::after { display: none; }
-  .start-content { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px; padding-bottom: 0; }
+  .start-content {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 18px;
+    padding-bottom: 0;
+    transform: none;
+  }
   .start-logo-wrap, .start-subtitle, .start-tagline { display: none; }
-  .start-title { font-size: 13px; }
+  .start-title { font-size: 13px; width: auto; }
   .title-accent { font-size: 26px; }
   .start-card { max-width: 320px; }
 }
