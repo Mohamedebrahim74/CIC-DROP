@@ -942,3 +942,65 @@ html, body {
   .title-accent { font-size: 26px; }
   .start-card { max-width: 320px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ADMIN — Player Access panel additions
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Search bar row */
+.admin-search-wrap {
+  margin-bottom: 1rem;
+}
+
+/* Section cards (Add Player, Bulk Import) */
+.admin-section-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-top: 2px solid var(--red);
+  border-radius: var(--r-lg);
+  padding: clamp(18px, 3vw, 28px);
+}
+
+/* Access ON/OFF badge */
+.access-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-family: var(--font-game);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+}
+.access-on  { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.access-off { background: rgba(239,68,68,0.12);  color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+/* Small action buttons inside the table */
+.admin-action-btn {
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid transparent;
+  font-family: var(--font-game);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  white-space: nowrap;
+}
+.admin-action-btn:hover  { opacity: 0.85; transform: translateY(-1px); }
+.admin-action-btn:active { transform: scale(0.95); }
+
+.btn-enable  { background: rgba(74,222,128,0.15);  color: #4ade80; border-color: rgba(74,222,128,0.3); }
+.btn-disable { background: rgba(251,191,36,0.12);  color: #fbbf24; border-color: rgba(251,191,36,0.3); }
+.btn-delete  { background: rgba(239,68,68,0.12);   color: #f87171; border-color: rgba(239,68,68,0.3); }
+
+/* Bulk import textarea */
+.bulk-textarea {
+  padding: 12px 14px !important; /* override icon padding */
+  resize: vertical;
+  min-height: 100px;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+}
+

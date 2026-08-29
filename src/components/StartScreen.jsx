@@ -9,9 +9,9 @@ function FloatingParticle({ delay, duration, x, size, opacity }) {
   );
 }
 
-export default function StartScreen({ onStart, checking, attemptsError, onClearAttemptsError }) {
-  const [name, setName] = useState('');
-  const [studentId, setStudentId] = useState('');
+export default function StartScreen({ onStart, checking, attemptsError, onClearAttemptsError, prefillName = '', prefillId = '' }) {
+  const [name, setName] = useState(prefillName);
+  const [studentId, setStudentId] = useState(prefillId);
   const [nameError, setNameError] = useState('');
   const [idError, setIdError] = useState('');
   const [particles] = useState(() =>
